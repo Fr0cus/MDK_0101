@@ -1,32 +1,37 @@
-from msilib.schema import Class
 import pickle
-     
+from multipledispatch import dispatch
 
 
 class Otdelbl(): #Класс - отдел с переменными, Класс "Отделы" с переменными: название отдела, этаж, телефон, начальник отдела.
     def __init__(self, nazv_otd, floor, phone, nath_otd):
         self.nazv_otd = nazv_otd
-        self.floor = floor
+        self.__floor = floor
         self.phone = phone
-        self.nath_otd = nath_otd
+        
 
+        if  isinstance(nath_otd, str):
+            self.nath_otd = nath_otd
+        else:                                   
+            raise InvalidNameError(nath_otd)
 
+    @property
+    def Floor(self): 
+        return self.__floor
     def Nachalinik(self):
         print(f"Начальник данного отдела - {self.nath_otd}")
 
-    #Деструктор
-    def __del__(self): #Уничтожение экземпляра
-        print(f"На этаж с названием отделом {self.nazv_otd} влетела ракета Калибр")
+    #def __del__(self): # Уничтожение экземпляра
+        #print(f"На этаж с названием отделом {self.nazv_otd} влетела ракета Калибр")
 
 #Сериализация
     def serialize(self): # Сериализация модели телефона
-        with open('D:\\Code_all\\MDK_0101\\лабораторные нормальные\\lr4_12_10\\cock.pkl', 'wb') as f:
+        with open('D:\\Code_all\\MDK_0101\\лабораторные нормалные\\lr4_12_10\\cock.pkl', 'wb') as f:
             pickle.dump(self.phone, f)
         f.closed
 
 #Десериализация
     def deserialize(self): #Десериализация модели телефона
-        with open('D:\\Code_all\\MDK_0101\\лабораторные нормальные\\lr4_12_10\\cock.pkl', 'rb') as f:
+        with open('D:\\Code_all\\MDK_0101\\лабораторные нормалные\\lr4_12_10\\cock.pkl', 'rb') as f:
             cock = pickle.load(f)
         f.closed
         print (cock)
@@ -78,28 +83,56 @@ class Budget(Organizatsia):
     def Name(self):  
         print(f'Название организации:{self.nazvanie_org}')
 
+    @dispatch(int, int)
+    def klbd(x1, x2): #  Вывод информации о бюджете на год
+        x =   x1 + x2
+        print (f"Суммарный бюджет на год {x}")
+
+    @dispatch(float, float)
+    def klbd(x1, x2): #  Вывод информации о бюджете на год
+        x =   x1 + x2
+        print (f"Суммарный бюджет на год {x}")
+
+    @dispatch(int, int, float, float)
+    def klbd(x1, x2, x3, x4): #  Вывод информации о бюджете на год
+        x =   x1 + x2+ x3 + x4
+        print (f"Суммарный бюджет на год {x}")
+
     
+
+class InvalidNameError(Exception):
+    def __init__(self, nath_otd):
+        self.nath_otd = nath_otd
+    
+    def __str__(self):
+        return f"Неправильное название - {self.nath_otd}! Название состоит из цифр, а должно из букв!"
+
+
 
 #Экземпляры
+try: 
+    o1 = Otdelbl("Calibr",4,"Redmi","Зимин Виктор Анатольевич")
+    o2 = Otdelbl("Bread", 1, "Xiaomi", "Лесовой Василий Батькович")
+    o3 = Otdelbl("Bread", 1, "Xiaomi", "2004")
+    r1 = Organizatsia("Хлебопекарня","Повар","Россия","Новодвинск","Мира 13","Шарипов Никита Олегович")
+    r1.Name()
+    r1 = Budget(r1.nazvanie_org,r1.type_deyatelnosti,r1.country,r1.city,r1.adres,r1.FIO_directora, 5)
+    s1 = Sotrydniki("Зимин Данила Викторович","Лаборант", 2 ,"М","Пушкина 25", "07.07.2002")
+    #print(s1.Nama())
+    o1.Nachalinik()
+    o2.Nachalinik()
 
-o1 = Otdelbl("Calibr",4,"Redmi","Зимин Виктор Анатольевич")
-o2 = Otdelbl("Bread", 1, "Xiaomi", "Лесовой Василий Батькович")
-r1 = Organizatsia("Хлебопекарня","Повар","Россия","Новодвинск","Мира 13","Шарипов Никита Олегович")
-r1.Name()
-r1 = Budget(r1.nazvanie_org,r1.type_deyatelnosti,r1.country,r1.city,r1.adres,r1.FIO_directora,5)
-s1 = Sotrydniki("Зимин Данила Викторович","Лаборант", 2 ,"М","Пушкина 25", "07.07.2002")
-print(s1.Nama())
-o1.Nachalinik()
-o2.Nachalinik()
 #del o1
 
-o2.serialize()
-o2.deserialize()
+    #o2.serialize()
+    #o2.deserialize()
 
 #Полиморфизм
-r1.Name()
+    #r1.Name()
 
-    
-
-
-
+    #Перегрузка методов
+    r1.klbd(30000, 45000)
+    r1.klbd(30000.30, 45000.45)
+    r1.klbd(30000, 45000, 30000.30, 45000.45)
+except InvalidNameError as e:
+    print(e)
